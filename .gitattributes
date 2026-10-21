@@ -1,0 +1,18 @@
+# Normalize line endings so files behave the same on Windows, Linux (Docker, CI) and macOS
+* text=auto eol=lf
+
+# Windows scripts need CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Maven wrapper must stay LF to run in Linux containers
+mvnw text eol=lf
+
+# Binary files
+*.jar binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

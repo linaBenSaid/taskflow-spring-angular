@@ -1,0 +1,25 @@
+# Root-level ignores only.
+# backend/ and frontend/ get their own .gitignore from Spring Initializr and Angular CLI.
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# IDEs
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+.claude/
+PLAN.md

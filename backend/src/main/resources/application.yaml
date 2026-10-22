@@ -1,3 +1,28 @@
 spring:
   application:
     name: taskflow
+
+  # Load DB credentials and secrets from the root .env file.
+  # Two paths so it works whether you run from backend/ (mvnw) or the repo root (IDE).
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+
+  datasource:
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+
+  jpa:
+    # Flyway owns the schema; Hibernate only checks that entities match the tables.
+    hibernate:
+      ddl-auto: validate
+    # Don't keep DB connections open while rendering HTTP responses.
+    open-in-view: false
+
+  flyway:
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}

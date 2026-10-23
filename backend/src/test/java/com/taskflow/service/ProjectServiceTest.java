@@ -12,6 +12,7 @@ import com.taskflow.exception.ConflictException;
 import com.taskflow.exception.ResourceNotFoundException;
 import com.taskflow.repository.ProjectMemberRepository;
 import com.taskflow.repository.ProjectRepository;
+import com.taskflow.repository.TaskRepository;
 import com.taskflow.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class ProjectServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private TaskRepository taskRepository;
 
 	@InjectMocks
 	private ProjectService projectService;
@@ -238,6 +242,7 @@ class ProjectServiceTest {
 		projectService.removeMember(PROJECT_ID, member.getId(), owner.getEmail());
 
 		assertThat(project.getMembers()).extracting(ProjectMember::getUser).containsExactly(owner);
+		verify(taskRepository).unassignAllInProject(PROJECT_ID, member.getId());
 	}
 
 	@Test
@@ -249,6 +254,7 @@ class ProjectServiceTest {
 		projectService.removeMember(PROJECT_ID, member.getId(), member.getEmail());
 
 		assertThat(project.getMembers()).extracting(ProjectMember::getUser).containsExactly(owner);
+		verify(taskRepository).unassignAllInProject(PROJECT_ID, member.getId());
 	}
 
 	@Test
@@ -261,6 +267,7 @@ class ProjectServiceTest {
 		assertThatThrownBy(() -> projectService.removeMember(PROJECT_ID, secondMember.getId(), member.getEmail()))
 				.isInstanceOf(AccessDeniedException.class);
 		assertThat(project.getMembers()).extracting(ProjectMember::getUser).contains(secondMember);
+		verify(taskRepository, never()).unassignAllInProject(any(), any());
 	}
 
 	@Test
@@ -281,6 +288,7 @@ class ProjectServiceTest {
 
 		assertThatThrownBy(() -> projectService.removeMember(PROJECT_ID, owner.getId(), owner.getEmail()))
 				.isInstanceOf(ConflictException.class);
+		verify(taskRepository, never()).unassignAllInProject(any(), any());
 	}
 
 	@Test

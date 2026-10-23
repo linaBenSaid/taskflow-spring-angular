@@ -53,11 +53,17 @@ public class Project {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
-	public void addMember(User user) {
-		members.add(new ProjectMember(this, user));
+	public ProjectMember addMember(User user) {
+		ProjectMember member = new ProjectMember(this, user);
+		members.add(member);
+		return member;
 	}
 
 	public void removeMember(User user) {
-		members.removeIf(member -> member.getUser().getId().equals(user.getId()));
+		removeMember(user.getId());
+	}
+
+	public void removeMember(Long userId) {
+		members.removeIf(member -> member.getUser().getId().equals(userId));
 	}
 }

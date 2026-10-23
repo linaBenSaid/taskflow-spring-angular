@@ -24,6 +24,12 @@ spring:
   flyway:
     locations: classpath:db/migration
 
+  # ?size=1000000 is capped at 100, so one request can't load the whole table.
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+
 server:
   port: ${SERVER_PORT:8080}
 

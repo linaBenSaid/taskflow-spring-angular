@@ -10,6 +10,7 @@ import com.taskflow.entity.Role;
 import com.taskflow.entity.User;
 import com.taskflow.exception.ConflictException;
 import com.taskflow.exception.ResourceNotFoundException;
+import com.taskflow.mapper.ProjectMapper;
 import com.taskflow.repository.ProjectMemberRepository;
 import com.taskflow.repository.ProjectRepository;
 import com.taskflow.repository.TaskRepository;
@@ -39,6 +40,7 @@ public class ProjectService {
 	private final ProjectMemberRepository projectMemberRepository;
 	private final UserRepository userRepository;
 	private final TaskRepository taskRepository;
+	private final ProjectMapper projectMapper;
 
 	@Transactional
 	public ProjectResponse create(ProjectRequest request, String actorEmail) {
@@ -49,18 +51,18 @@ public class ProjectService {
 		project.setOwner(actor);
 		project.addMember(actor); // the owner is always a member too
 
-		return ProjectResponse.from(projectRepository.save(project));
+		return projectMapper.toResponse(projectRepository.save(project));
 	}
 
 	@Transactional(readOnly = true)
 	public Page<ProjectResponse> listMine(String actorEmail, Pageable pageable) {
 		User actor = loadActor(actorEmail);
-		return projectRepository.findByMembersUserId(actor.getId(), pageable).map(ProjectResponse::from);
+		return projectRepository.findByMembersUserId(actor.getId(), pageable).map(projectMapper::toResponse);
 	}
 
 	@Transactional(readOnly = true)
 	public ProjectResponse get(Long projectId, String actorEmail) {
-		return ProjectResponse.from(findForMember(projectId, loadActor(actorEmail)));
+		return projectMapper.toResponse(findForMember(projectId, loadActor(actorEmail)));
 	}
 
 	@Transactional
@@ -72,7 +74,7 @@ public class ProjectService {
 		}
 
 		applyChanges(project, request);
-		return ProjectResponse.from(project); // saved automatically when the transaction commits
+		return projectMapper.toResponse(project); // saved automatically when the transaction commits
 	}
 
 	@Transactional
@@ -94,7 +96,7 @@ public class ProjectService {
 		}
 
 		return projectMemberRepository.findByProjectIdOrderByJoinedAtAsc(projectId).stream()
-				.map(ProjectMemberResponse::from)
+				.map(projectMapper::toResponse)
 				.toList();
 	}
 
@@ -115,7 +117,7 @@ public class ProjectService {
 
 		ProjectMember member = project.addMember(newMember);
 		projectRepository.flush(); // insert now, so joinedAt is filled in for the response
-		return ProjectMemberResponse.from(member);
+		return projectMapper.toResponse(member);
 	}
 
 	@Transactional

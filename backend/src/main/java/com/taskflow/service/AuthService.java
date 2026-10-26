@@ -3,10 +3,10 @@ package com.taskflow.service;
 import com.taskflow.dto.AuthResponse;
 import com.taskflow.dto.LoginRequest;
 import com.taskflow.dto.RegisterRequest;
-import com.taskflow.dto.UserResponse;
 import com.taskflow.entity.Role;
 import com.taskflow.entity.User;
 import com.taskflow.exception.EmailAlreadyUsedException;
+import com.taskflow.mapper.UserMapper;
 import com.taskflow.repository.UserRepository;
 import com.taskflow.security.JwtService;
 import com.taskflow.util.Emails;
@@ -23,6 +23,7 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
+	private final UserMapper userMapper;
 
 	@Transactional
 	public AuthResponse register(RegisterRequest request) {
@@ -52,6 +53,6 @@ public class AuthService {
 
 	private AuthResponse toAuthResponse(User user) {
 		return AuthResponse.bearer(jwtService.generateToken(user), jwtService.getExpirationSeconds(),
-				UserResponse.from(user));
+				userMapper.toResponse(user));
 	}
 }

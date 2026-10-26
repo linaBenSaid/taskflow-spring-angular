@@ -1,6 +1,7 @@
 package com.taskflow.service;
 
 import com.taskflow.dto.CreateTaskRequest;
+import com.taskflow.dto.TaskFilter;
 import com.taskflow.dto.TaskResponse;
 import com.taskflow.dto.UpdateTaskRequest;
 import com.taskflow.entity.Project;
@@ -11,8 +12,11 @@ import com.taskflow.exception.ResourceNotFoundException;
 import com.taskflow.repository.ProjectMemberRepository;
 import com.taskflow.repository.ProjectRepository;
 import com.taskflow.repository.TaskRepository;
+import com.taskflow.repository.TaskSpecifications;
 import com.taskflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +55,18 @@ public class TaskService {
 		task.setAssignee(request.assigneeId() == null ? null : findAssignee(projectId, request.assigneeId()));
 
 		return TaskResponse.from(taskRepository.save(task));
+	}
+
+	// A page of the project's tasks, narrowed by whichever filters are set. Members only (404 otherwise).
+	@Transactional(readOnly = true)
+	public Page<TaskResponse> list(Long projectId, TaskFilter filter, Pageable pageable, String actorEmail) {
+		User actor = loadActor(actorEmail);
+		if (!projectMemberRepository.existsByProjectIdAndUserId(projectId, actor.getId())) {
+			throw ResourceNotFoundException.project(projectId);
+		}
+
+		return taskRepository.findAll(TaskSpecifications.forFilter(projectId, filter), pageable)
+				.map(TaskResponse::from);
 	}
 
 	@Transactional(readOnly = true)

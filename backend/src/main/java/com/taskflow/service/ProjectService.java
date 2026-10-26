@@ -134,9 +134,11 @@ public class ProjectService {
 			throw new ResourceNotFoundException("User " + userId + " is not a member of this project");
 		}
 
+		project.removeMember(userId); // orphanRemoval deletes the member row
+
 		// Their tasks stay on the board, unassigned: nobody should be assigned work in a project they can't see.
+		// Must come last: this bulk update first flushes the member removal above, then clears Hibernate's cache.
 		taskRepository.unassignAllInProject(projectId, userId);
-		project.removeMember(userId); // orphanRemoval deletes the row when the transaction commits
 	}
 
 	private User loadActor(String email) {

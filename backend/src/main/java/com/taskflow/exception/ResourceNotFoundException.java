@@ -10,4 +10,8 @@ public class ResourceNotFoundException extends RuntimeException {
 	public static ResourceNotFoundException project(Long projectId) {
 		return new ResourceNotFoundException("Project " + projectId + " not found");
 	}
+
+	public static ResourceNotFoundException task(Long taskId) {
+		return new ResourceNotFoundException("Task " + taskId + " not found");
+	}
 }

@@ -12,6 +12,7 @@ import com.taskflow.exception.ConflictException;
 import com.taskflow.exception.ResourceNotFoundException;
 import com.taskflow.repository.ProjectMemberRepository;
 import com.taskflow.repository.ProjectRepository;
+import com.taskflow.repository.TaskRepository;
 import com.taskflow.repository.UserRepository;
 import com.taskflow.util.Emails;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.List;
 // - Only the owner can edit a project or add members.
 // - The owner or an ADMIN can delete a project or remove members. A member can always leave (remove themselves).
 // - The owner can't be removed from their own project.
+// - Whoever leaves or is removed gets unassigned from their tasks in that project.
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -36,6 +38,7 @@ public class ProjectService {
 	private final ProjectRepository projectRepository;
 	private final ProjectMemberRepository projectMemberRepository;
 	private final UserRepository userRepository;
+	private final TaskRepository taskRepository;
 
 	@Transactional
 	public ProjectResponse create(ProjectRequest request, String actorEmail) {
@@ -131,7 +134,11 @@ public class ProjectService {
 			throw new ResourceNotFoundException("User " + userId + " is not a member of this project");
 		}
 
-		project.removeMember(userId); // orphanRemoval deletes the row when the transaction commits
+		project.removeMember(userId); // orphanRemoval deletes the member row
+
+		// Their tasks stay on the board, unassigned: nobody should be assigned work in a project they can't see.
+		// Must come last: this bulk update first flushes the member removal above, then clears Hibernate's cache.
+		taskRepository.unassignAllInProject(projectId, userId);
 	}
 
 	private User loadActor(String email) {

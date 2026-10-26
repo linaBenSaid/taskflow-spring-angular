@@ -273,7 +273,7 @@ class TaskServiceTest {
 
 		assertThatThrownBy(() -> taskService.delete(TASK_ID, outsider.getEmail()))
 				.isInstanceOf(ResourceNotFoundException.class);
-		verify(taskRepository, never()).delete(any());
+		verify(taskRepository, never()).delete(any(Task.class));
 	}
 
 	// --- helpers ---

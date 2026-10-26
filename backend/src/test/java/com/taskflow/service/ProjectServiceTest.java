@@ -10,6 +10,9 @@ import com.taskflow.entity.Role;
 import com.taskflow.entity.User;
 import com.taskflow.exception.ConflictException;
 import com.taskflow.exception.ResourceNotFoundException;
+import com.taskflow.mapper.ProjectMapper;
+import com.taskflow.mapper.ProjectMapperImpl;
+import com.taskflow.mapper.UserMapperImpl;
 import com.taskflow.repository.ProjectMemberRepository;
 import com.taskflow.repository.ProjectRepository;
 import com.taskflow.repository.TaskRepository;
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
@@ -49,6 +53,10 @@ class ProjectServiceTest {
 
 	@Mock
 	private TaskRepository taskRepository;
+
+	// A real mapper (the classes MapStruct generated), handed to the service by @InjectMocks.
+	@Spy
+	private ProjectMapper projectMapper = new ProjectMapperImpl(new UserMapperImpl());
 
 	@InjectMocks
 	private ProjectService projectService;

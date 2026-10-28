@@ -33,6 +33,13 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+# Swagger UI at /swagger-ui.html, OpenAPI JSON at /v3/api-docs
+springdoc:
+  default-produces-media-type: application/json
+  swagger-ui:
+    persist-authorization: true # keep the pasted JWT after a page refresh
+    tags-sorter: alpha
+
 app:
   jwt:
     secret: ${JWT_SECRET}

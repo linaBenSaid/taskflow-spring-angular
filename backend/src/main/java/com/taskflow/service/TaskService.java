@@ -9,6 +9,7 @@ import com.taskflow.entity.Task;
 import com.taskflow.entity.User;
 import com.taskflow.exception.InvalidRequestException;
 import com.taskflow.exception.ResourceNotFoundException;
+import com.taskflow.mapper.TaskMapper;
 import com.taskflow.repository.ProjectMemberRepository;
 import com.taskflow.repository.ProjectRepository;
 import com.taskflow.repository.TaskRepository;
@@ -34,6 +35,7 @@ public class TaskService {
 	private final ProjectRepository projectRepository;
 	private final ProjectMemberRepository projectMemberRepository;
 	private final UserRepository userRepository;
+	private final TaskMapper taskMapper;
 
 	@Transactional
 	public TaskResponse create(Long projectId, CreateTaskRequest request, String actorEmail) {
@@ -54,7 +56,7 @@ public class TaskService {
 		task.setDueDate(request.dueDate());
 		task.setAssignee(request.assigneeId() == null ? null : findAssignee(projectId, request.assigneeId()));
 
-		return TaskResponse.from(taskRepository.save(task));
+		return taskMapper.toResponse(taskRepository.save(task));
 	}
 
 	// A page of the project's tasks, narrowed by whichever filters are set. Members only (404 otherwise).
@@ -66,12 +68,12 @@ public class TaskService {
 		}
 
 		return taskRepository.findAll(TaskSpecifications.forFilter(projectId, filter), pageable)
-				.map(TaskResponse::from);
+				.map(taskMapper::toResponse);
 	}
 
 	@Transactional(readOnly = true)
 	public TaskResponse get(Long taskId, String actorEmail) {
-		return TaskResponse.from(findForMember(taskId, loadActor(actorEmail)));
+		return taskMapper.toResponse(findForMember(taskId, loadActor(actorEmail)));
 	}
 
 	// Partial update: null = not sent (keep), Optional.empty() = clear, Optional.of(x) = set. See UpdateTaskRequest.
@@ -101,7 +103,7 @@ public class TaskService {
 
 		// flush so @UpdateTimestamp sets updatedAt before we build the response
 		taskRepository.flush();
-		return TaskResponse.from(task);
+		return taskMapper.toResponse(task);
 	}
 
 	@Transactional

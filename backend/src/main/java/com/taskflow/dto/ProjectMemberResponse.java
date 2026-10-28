@@ -1,13 +1,7 @@
 package com.taskflow.dto;
 
-import com.taskflow.entity.ProjectMember;
-
 import java.time.Instant;
 
+// Built by ProjectMapper from a ProjectMember and its user.
 public record ProjectMemberResponse(Long userId, String email, String name, Instant joinedAt) {
-
-	public static ProjectMemberResponse from(ProjectMember member) {
-		return new ProjectMemberResponse(member.getUser().getId(), member.getUser().getEmail(),
-				member.getUser().getName(), member.getJoinedAt());
-	}
 }

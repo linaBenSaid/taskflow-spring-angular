@@ -30,6 +30,8 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/api/auth/**", "/actuator/health", "/error").permitAll()
+						// API docs are public so anyone can read them; calling a protected endpoint still needs a token.
+						.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						.anyRequest().authenticated())
 				// Missing or invalid token: answer 401 instead of redirecting to a login page.
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

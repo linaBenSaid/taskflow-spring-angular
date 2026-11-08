@@ -33,6 +33,7 @@ class ApiDocsTest {
 				.andExpect(jsonPath("$.paths['/api/projects']").exists())
 				.andExpect(jsonPath("$.paths['/api/projects/{projectId}/tasks']").exists())
 				.andExpect(jsonPath("$.paths['/api/tasks/{id}'].patch").exists())
+				.andExpect(jsonPath("$.paths['/api/tasks/{taskId}/comments'].post").exists())
 				// The "Authorize" button: a JWT bearer scheme, required by default...
 				.andExpect(jsonPath("$.components.securitySchemes.bearerAuth.scheme").value("bearer"))
 				.andExpect(jsonPath("$.security[0].bearerAuth").exists())

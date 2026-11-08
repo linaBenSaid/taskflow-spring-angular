@@ -1,9 +1,11 @@
 package com.taskflow.mapper;
 
+import com.taskflow.dto.CommentResponse;
 import com.taskflow.dto.ProjectMemberResponse;
 import com.taskflow.dto.ProjectResponse;
 import com.taskflow.dto.TaskResponse;
 import com.taskflow.dto.UserResponse;
+import com.taskflow.entity.Comment;
 import com.taskflow.entity.Project;
 import com.taskflow.entity.ProjectMember;
 import com.taskflow.entity.Role;
@@ -20,6 +22,7 @@ class MapperTest {
 	private final UserMapper userMapper = new UserMapperImpl();
 	private final ProjectMapper projectMapper = new ProjectMapperImpl(userMapper);
 	private final TaskMapper taskMapper = new TaskMapperImpl(userMapper);
+	private final CommentMapper commentMapper = new CommentMapperImpl(userMapper);
 
 	@Test
 	void mapsUserWithoutPasswordHash() {
@@ -69,6 +72,23 @@ class MapperTest {
 
 		task.setAssignee(user());
 		assertThat(taskMapper.toResponse(task).assignee().name()).isEqualTo("Alice");
+	}
+
+	@Test
+	void mapsCommentWithAndWithoutAuthor() {
+		Task task = new Task();
+		task.setId(100L);
+		Comment comment = new Comment();
+		comment.setTask(task);
+		comment.setBody("Looks good");
+
+		CommentResponse deletedAuthor = commentMapper.toResponse(comment);
+		assertThat(deletedAuthor.taskId()).isEqualTo(100L);
+		assertThat(deletedAuthor.body()).isEqualTo("Looks good");
+		assertThat(deletedAuthor.author()).isNull();
+
+		comment.setAuthor(user());
+		assertThat(commentMapper.toResponse(comment).author().name()).isEqualTo("Alice");
 	}
 
 	private static User user() {
